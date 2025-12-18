@@ -17,8 +17,13 @@
 ├── README.md
 ├── templates/               # Шаблоны образов
 │   ├── ubuntu.pkr.hcl       # Ubuntu образ
+│   ├── ubuntu-salt.pkr.hcl  # Ubuntu образ с Salt provisioner
 │   ├── debian.pkr.hcl       # Debian образ
 │   └── alpine.pkr.hcl       # Alpine образ
+├── salt/                    # Salt конфигурация
+│   ├── minion               # Конфиг для masterless режима
+│   ├── states/              # Salt states
+│   └── pillar/              # Pillar данные
 ├── scripts/                 # Provisioning скрипты
 │   ├── common.sh            # Общие настройки
 │   ├── security.sh          # Настройки безопасности
@@ -52,6 +57,9 @@ make build-debian
 
 # Сборка Alpine образа
 make build-alpine
+
+# Сборка Ubuntu с Salt provisioner
+make build-ubuntu-salt
 
 # Сборка всех образов
 make build-all
@@ -116,6 +124,41 @@ provisioner "shell" {
     "../scripts/your-script.sh"
   ]
 }
+```
+
+## Использование Salt
+
+Проект поддерживает provisioning с помощью Salt в masterless режиме. Salt конфигурация находится в папке `salt/`.
+
+### Структура Salt
+
+```
+salt/
+├── minion              # Конфиг Salt minion
+├── pillar/             # Pillar данные (переменные)
+│   ├── top.sls
+│   ├── common.sls
+│   └── packages.sls
+└── states/             # Salt states
+    ├── top.sls
+    ├── common/init.sls
+    └── packages/init.sls
+```
+
+### Добавление нового state
+
+1. Создайте директорию в `salt/states/` (например, `nginx/`)
+2. Добавьте `init.sls` с описанием state
+3. Включите state в `salt/states/top.sls`
+4. При необходимости добавьте pillar данные в `salt/pillar/`
+
+Пример `salt/states/nginx/init.sls`:
+
+```yaml
+nginx:
+  pkg.installed: []
+  service.running:
+    - enable: True
 ```
 
 ## Доступные исходные образы

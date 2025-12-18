@@ -1,0 +1,54 @@
+.PHONY: init validate build-ubuntu build-debian build-alpine build-all clean help
+
+PACKER := packer
+TEMPLATES_DIR := templates
+VARIABLES_DIR := variables
+
+help:
+	@echo "Incus Packer Image Builder"
+	@echo ""
+	@echo "Usage:"
+	@echo "  make init           - Initialize Packer and download plugins"
+	@echo "  make validate       - Validate all Packer templates"
+	@echo "  make build-ubuntu   - Build Ubuntu image"
+	@echo "  make build-debian   - Build Debian image"
+	@echo "  make build-alpine   - Build Alpine image"
+	@echo "  make build-all      - Build all images"
+	@echo "  make clean          - Remove build artifacts"
+	@echo ""
+	@echo "Options:"
+	@echo "  VM=true             - Build as virtual machine (e.g., make build-ubuntu VM=true)"
+	@echo "  PROFILE=myprofile   - Use specific Incus profile"
+
+init:
+	$(PACKER) init .
+
+validate:
+	cd $(TEMPLATES_DIR) && $(PACKER) validate ubuntu.pkr.hcl
+	cd $(TEMPLATES_DIR) && $(PACKER) validate debian.pkr.hcl
+	cd $(TEMPLATES_DIR) && $(PACKER) validate alpine.pkr.hcl
+
+build-ubuntu: init
+	cd $(TEMPLATES_DIR) && $(PACKER) build \
+		$(if $(VM),-var 'virtual_machine=true',) \
+		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
+		ubuntu.pkr.hcl
+
+build-debian: init
+	cd $(TEMPLATES_DIR) && $(PACKER) build \
+		$(if $(VM),-var 'virtual_machine=true',) \
+		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
+		debian.pkr.hcl
+
+build-alpine: init
+	cd $(TEMPLATES_DIR) && $(PACKER) build \
+		$(if $(VM),-var 'virtual_machine=true',) \
+		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
+		alpine.pkr.hcl
+
+build-all: build-ubuntu build-debian build-alpine
+
+clean:
+	@echo "Cleaning up..."
+	rm -rf packer_cache
+	@echo "Note: To remove built images, use 'incus image delete <image-name>'"

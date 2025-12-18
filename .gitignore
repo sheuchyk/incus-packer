@@ -1,0 +1,22 @@
+# Packer cache
+packer_cache/
+
+# Crash log
+crash.log
+
+# Plugin binaries
+packer-plugin-*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporary files
+*.tmp
+*.bak

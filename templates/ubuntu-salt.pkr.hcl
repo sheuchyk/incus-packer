@@ -43,15 +43,17 @@ source "incus" "ubuntu" {
 build {
   sources = ["source.incus.ubuntu"]
 
-  # Install Salt
+  # Install Salt from official repository
   provisioner "shell" {
     inline = [
       "export DEBIAN_FRONTEND=noninteractive",
       "apt-get update",
-      "apt-get install -y curl",
-      "curl -fsSL https://bootstrap.saltproject.io -o install_salt.sh",
-      "sh install_salt.sh -P",
-      "rm install_salt.sh"
+      "apt-get install -y curl gnupg",
+      "mkdir -p /etc/apt/keyrings",
+      "curl -fsSL https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public | gpg --dearmor -o /etc/apt/keyrings/salt-archive-keyring.gpg",
+      "echo 'deb [signed-by=/etc/apt/keyrings/salt-archive-keyring.gpg] https://packages.broadcom.com/artifactory/saltproject-deb stable main' > /etc/apt/sources.list.d/salt.list",
+      "apt-get update",
+      "apt-get install -y salt-minion"
     ]
   }
 

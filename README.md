@@ -18,6 +18,7 @@
 ├── templates/               # Шаблоны образов
 │   ├── ubuntu.pkr.hcl       # Ubuntu образ
 │   ├── ubuntu-salt.pkr.hcl  # Ubuntu образ с Salt provisioner
+│   ├── ubuntu-salt-master.pkr.hcl  # Ubuntu образ с Salt Master
 │   ├── debian.pkr.hcl       # Debian образ
 │   └── alpine.pkr.hcl       # Alpine образ
 ├── salt/                    # Salt конфигурация
@@ -60,6 +61,9 @@ make build-alpine
 
 # Сборка Ubuntu с Salt provisioner
 make build-ubuntu-salt
+
+# Сборка Ubuntu с Salt Master
+make build-ubuntu-salt-master
 
 # Сборка всех образов
 make build-all

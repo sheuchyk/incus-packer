@@ -1,12 +1,12 @@
 variable "image_name" {
   type        = string
-  default     = "ubuntu-salt"
+  default     = "ubuntu-salt-master"
   description = "Name of the output image"
 }
 
 variable "image_description" {
   type        = string
-  default     = "Ubuntu image provisioned with Salt"
+  default     = "Ubuntu image with Salt Master installed"
   description = "Description of the output image"
 }
 
@@ -31,7 +31,7 @@ variable "profile" {
 source "incus" "ubuntu" {
   image           = var.source_image
   output_image    = var.image_name
-  container_name  = "packer-ubuntu-salt-build"
+  container_name  = "packer-ubuntu-salt-master-build"
   profile         = var.profile
   virtual_machine = var.virtual_machine
 
@@ -43,7 +43,7 @@ source "incus" "ubuntu" {
 build {
   sources = ["source.incus.ubuntu"]
 
-  # Install Salt from official repository
+  # Install Salt Master from official repository
   provisioner "shell" {
     inline = [
       "export DEBIAN_FRONTEND=noninteractive",
@@ -53,44 +53,23 @@ build {
       "curl -fsSL https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public | gpg --dearmor -o /etc/apt/keyrings/salt-archive-keyring.gpg",
       "echo 'deb [signed-by=/etc/apt/keyrings/salt-archive-keyring.gpg] https://packages.broadcom.com/artifactory/saltproject-deb stable main' > /etc/apt/sources.list.d/salt.list",
       "apt-get update",
-      "apt-get install -y salt-minion"
+      "apt-get install -y salt-master salt-minion"
     ]
   }
 
-  # Copy Salt configuration
-  provisioner "file" {
-    source      = "../salt/"
-    destination = "/srv/salt/"
-  }
-
-  provisioner "file" {
-    source      = "../salt/minion"
-    destination = "/etc/salt/minion"
-  }
-
-  # Run Salt in masterless mode
+  # Configure Salt Master
   provisioner "shell" {
     inline = [
-      "salt-call --local state.apply"
+      "mkdir -p /srv/salt /srv/pillar",
+      "systemctl enable salt-master",
+      "systemctl enable salt-minion"
     ]
   }
 
-  # Cleanup Salt (optional - remove if you want Salt to remain installed)
-  # provisioner "shell" {
-  #   inline = [
-  #     "apt-get purge -y salt-minion salt-common",
-  #     "apt-get autoremove -y",
-  #     "apt-get clean",
-  #     "rm -rf /srv/salt /var/cache/salt /var/log/salt",
-  #     "rm -rf /var/lib/apt/lists/*"
-  #   ]
-  # }
-
-    # Cleanup
+  # Cleanup
   provisioner "shell" {
     inline = [
       "apt-get clean",
-      "rm -rf /srv/salt /var/cache/salt /var/log/salt",
       "rm -rf /var/lib/apt/lists/*"
     ]
   }

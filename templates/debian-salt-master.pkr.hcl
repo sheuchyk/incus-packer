@@ -92,7 +92,7 @@ build {
   provisioner "shell" {
     inline = [
       "apt-get clean",
-      "rm -rf /var/cache/salt /var/log/salt",
+      "rm -rf /var/cache/salt/* /var/log/salt/*",
       "rm -rf /var/lib/apt/lists/*"
     ]
   }

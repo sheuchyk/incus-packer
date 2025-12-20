@@ -57,30 +57,34 @@ build {
     ]
   }
 
-  # Configure Salt Master
+  # Configure Salt Master directories
   provisioner "shell" {
     inline = [
-      "mkdir -p /srv/salt /srv/pillar",
-      "systemctl enable salt-master",
-      "systemctl enable salt-minion"
+      "mkdir -p /srv/salt/states /srv/salt/pillar /etc/salt/pki/master"
     ]
   }
 
-  # Copy Salt configuration
+  # Copy Salt Master configuration
   provisioner "file" {
-    source      = "../salt/"
-    destination = "/srv/salt/"
+    source      = "../salt/master"
+    destination = "/etc/salt/master"
+  }
+
+  # Copy Salt states and pillar
+  provisioner "file" {
+    source      = "../salt/states/"
+    destination = "/srv/salt/states/"
   }
 
   provisioner "file" {
-    source      = "../salt/minion"
-    destination = "/etc/salt/minion"
+    source      = "../salt/pillar/"
+    destination = "/srv/salt/pillar/"
   }
 
-  # Run Salt in masterless mode
+  # Enable Salt Master service
   provisioner "shell" {
     inline = [
-      "salt-call --local state.apply"
+      "systemctl enable salt-master"
     ]
   }
 
@@ -88,7 +92,7 @@ build {
   provisioner "shell" {
     inline = [
       "apt-get clean",
-      "rm -rf /srv/salt /var/cache/salt /var/log/salt",
+      "rm -rf /var/cache/salt /var/log/salt",
       "rm -rf /var/lib/apt/lists/*"
     ]
   }

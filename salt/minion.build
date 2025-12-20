@@ -1,4 +1,4 @@
-# Salt minion configuration for masterless mode
+# Salt minion configuration for masterless build mode
 
 file_client: local
 

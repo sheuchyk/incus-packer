@@ -57,14 +57,20 @@ build {
     ]
   }
 
-  # Copy Salt configuration
+  # Copy Salt states and pillar
   provisioner "file" {
-    source      = "../salt/"
-    destination = "/srv/salt/"
+    source      = "../salt/states/"
+    destination = "/srv/salt/states/"
   }
 
   provisioner "file" {
-    source      = "../salt/minion"
+    source      = "../salt/pillar/"
+    destination = "/srv/salt/pillar/"
+  }
+
+  # Copy temporary masterless config for build
+  provisioner "file" {
+    source      = "../salt/minion.build"
     destination = "/etc/salt/minion"
   }
 
@@ -72,6 +78,13 @@ build {
   provisioner "shell" {
     inline = [
       "salt-call --local state.apply"
+    ]
+  }
+
+  # Remove minion config (will be configured at deploy time)
+  provisioner "shell" {
+    inline = [
+      "rm -f /etc/salt/minion"
     ]
   }
 

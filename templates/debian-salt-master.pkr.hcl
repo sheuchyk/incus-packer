@@ -66,10 +66,29 @@ build {
     ]
   }
 
+  # Copy Salt configuration
+  provisioner "file" {
+    source      = "../salt/"
+    destination = "/srv/salt/"
+  }
+
+  provisioner "file" {
+    source      = "../salt/minion"
+    destination = "/etc/salt/minion"
+  }
+
+  # Run Salt in masterless mode
+  provisioner "shell" {
+    inline = [
+      "salt-call --local state.apply"
+    ]
+  }
+
   # Cleanup
   provisioner "shell" {
     inline = [
       "apt-get clean",
+      "rm -rf /srv/salt /var/cache/salt /var/log/salt",
       "rm -rf /var/lib/apt/lists/*"
     ]
   }

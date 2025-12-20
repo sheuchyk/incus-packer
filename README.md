@@ -8,6 +8,61 @@
 - [Incus](https://linuxcontainers.org/incus/) установлен и настроен
 - Linux система с поддержкой контейнеров
 
+## Установка и настройка incus
+
+```
+sudo apt update
+sudo apt install -y git build-essential
+```
+
+## Установка и настройка packer
+
+```
+wget -O - https://apt.releases.hashicorp.com/gpg | sudo gpg --dearmor -o /usr/share/keyrings/hashicorp-archive-keyring.gpg
+echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/hashicorp-archive-keyring.gpg] https://apt.releases.hashicorp.com $(grep -oP '(?<=UBUNTU_CODENAME=).*' /etc/os-release || lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/hashicorp.list
+sudo apt update && sudo apt install packer
+```
+
+### Установка ZFS
+
+```bash
+sudo apt update
+sudo apt install -y zfsutils-linux
+```
+
+### Создание ZFS пула
+
+```bash
+# Создание RAIDZ1 пула из трёх NVMe дисков
+sudo zpool create -f incus-pool raidz1 /dev/nvme1n1 /dev/nvme2n1 /dev/nvme3n1
+
+# Проверка пула
+sudo zpool status incus-pool
+
+# Включение сжатия
+sudo zfs set compression=lz4 incus-pool
+```
+
+### Добавление пользователя в группу incus
+
+```bash
+sudo gpasswd --add $USER incus-admin
+sudo usermod -aG incus-admin $(whoami)
+newgrp incus-admin
+```
+
+### Инициализация Incus с ZFS
+
+```bash
+incus admin init
+```
+
+При инициализации выберите:
+
+- Storage backend: **zfs**
+- Create a new ZFS pool: **no**
+- Name of the existing ZFS pool: **incus-pool**
+
 ## Структура проекта
 
 ```
@@ -95,14 +150,14 @@ packer build -var 'image_name=my-ubuntu' -var 'virtual_machine=true' ubuntu.pkr.
 
 ## Переменные
 
-| Переменная | Описание | По умолчанию |
-|------------|----------|--------------|
-| `image_name` | Имя выходного образа | `ubuntu-custom` / `debian-custom` / `alpine-custom` |
-| `image_description` | Описание образа | `Custom <distro> image built with Packer` |
-| `source_image` | Исходный образ | `images:ubuntu/24.04` / `images:debian/12` / `images:alpine/3.20` |
-| `install_packages` | Пакеты для установки | `["curl", "wget", "vim"]` |
-| `virtual_machine` | Сборка как VM | `false` |
-| `profile` | Профиль Incus | `default` |
+| Переменная          | Описание             | По умолчанию                                                      |
+| ------------------- | -------------------- | ----------------------------------------------------------------- |
+| `image_name`        | Имя выходного образа | `ubuntu-custom` / `debian-custom` / `alpine-custom`               |
+| `image_description` | Описание образа      | `Custom <distro> image built with Packer`                         |
+| `source_image`      | Исходный образ       | `images:ubuntu/24.04` / `images:debian/12` / `images:alpine/3.20` |
+| `install_packages`  | Пакеты для установки | `["curl", "wget", "vim"]`                                         |
+| `virtual_machine`   | Сборка как VM        | `false`                                                           |
+| `profile`           | Профиль Incus        | `default`                                                         |
 
 ## Использование собранных образов
 
@@ -174,6 +229,7 @@ incus image list images:
 ```
 
 Популярные образы:
+
 - `images:ubuntu/24.04` - Ubuntu 24.04 LTS
 - `images:ubuntu/22.04` - Ubuntu 22.04 LTS
 - `images:debian/12` - Debian 12 (Bookworm)

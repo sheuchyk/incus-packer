@@ -70,7 +70,7 @@ build-alpine: init
 		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
 		alpine.pkr.hcl
 
-build-all: build-ubuntu build-debian build-alpine
+build-all: build-ubuntu build-ubuntu-salt build-ubuntu-salt-master build-debian build-debian-salt-master build-alpine
 
 clean:
 	@echo "Cleaning up..."

@@ -20,9 +20,9 @@ sleep 2
 echo "Copying minion configuration..."
 incus file push "$MINION_CONFIG" "$CONTAINER_NAME/etc/salt/minion"
 
-echo "Enabling and starting salt-minion..."
+echo "Enabling and restarting salt-minion..."
 incus exec "$CONTAINER_NAME" -- systemctl enable salt-minion
-incus exec "$CONTAINER_NAME" -- systemctl start salt-minion
+incus exec "$CONTAINER_NAME" -- systemctl restart salt-minion
 
 echo "Done. Container '$CONTAINER_NAME' is running with salt-minion connected to master."
 echo "Accept the key on master: salt-key -a $CONTAINER_NAME"

@@ -77,7 +77,9 @@ incus admin init
 │   ├── debian.pkr.hcl       # Debian образ
 │   └── alpine.pkr.hcl       # Alpine образ
 ├── salt/                    # Salt конфигурация
-│   ├── minion               # Конфиг для masterless режима
+│   ├── master               # Конфиг Salt Master
+│   ├── minion.build         # Конфиг для masterless сборки
+│   ├── minion.production    # Конфиг для подключения к master
 │   ├── states/              # Salt states
 │   └── pillar/              # Pillar данные
 ├── scripts/                 # Provisioning скрипты
@@ -193,7 +195,9 @@ provisioner "shell" {
 
 ```
 salt/
-├── minion              # Конфиг Salt minion
+├── master              # Конфиг Salt Master
+├── minion.build        # Конфиг для masterless сборки образа
+├── minion.production   # Конфиг для подключения к master (10.39.46.91)
 ├── pillar/             # Pillar данные (переменные)
 │   ├── top.sls
 │   ├── common.sls
@@ -202,6 +206,46 @@ salt/
     ├── top.sls
     ├── common/init.sls
     └── packages/init.sls
+```
+
+### Сборка образа с Salt
+
+При сборке образа используется `minion.build` для masterless провижининга. Конфиг удаляется после применения states — образ не содержит настроек подключения к master.
+
+```bash
+# Сборка образа с Salt minion
+make build-ubuntu-salt
+
+# Сборка образа с Salt Master
+make build-debian-salt-master
+```
+
+### Запуск контейнера с подключением к Master
+
+После сборки образа контейнер не содержит конфигурации minion. Для запуска с подключением к master используйте скрипт:
+
+```bash
+./scripts/deploy-minion.sh <container-name> [image-name]
+
+# Пример
+./scripts/deploy-minion.sh web-server ubuntu-salt
+```
+
+Скрипт:
+1. Создаёт контейнер из образа
+2. Копирует `minion.production` в `/etc/salt/minion`
+3. Запускает `salt-minion` сервис
+
+После запуска примите ключ на master:
+```bash
+salt-key -a <container-name>
+```
+
+### Изменение адреса Master
+
+Отредактируйте `salt/minion.production`:
+```yaml
+master: <новый-ip-или-hostname>
 ```
 
 ### Добавление нового state

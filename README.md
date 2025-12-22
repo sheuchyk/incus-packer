@@ -247,7 +247,7 @@ make build-debian-salt-master
 ./scripts/deploy-minion.sh <container-name> [image-name]
 
 # Пример
-./scripts/deploy-minion.sh web-server ubuntu-salt
+./scripts/deploy-minion.sh web-server debian-salt
 ```
 
 Скрипт:

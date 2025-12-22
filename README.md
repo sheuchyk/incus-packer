@@ -221,6 +221,24 @@ make build-ubuntu-salt
 make build-debian-salt-master
 ```
 
+### Запуск Salt Master
+
+Для запуска контейнера с Salt Master используйте скрипт:
+
+```bash
+./scripts/deploy-master.sh <container-name> [image-name]
+
+# Пример
+./scripts/deploy-master.sh salt-master debian-salt-master
+```
+
+Скрипт:
+
+1. Создаёт контейнер из образа
+2. Копирует `salt/master` в `/etc/salt/master`
+3. Копирует Salt states и pillar в `/srv/salt/`
+4. Запускает `salt-master` сервис
+
 ### Запуск контейнера с подключением к Master
 
 После сборки образа контейнер не содержит конфигурации minion. Для запуска с подключением к master используйте скрипт:
@@ -242,6 +260,8 @@ make build-debian-salt-master
 
 ```bash
 salt-key -a <container-name>
+# или на Salt Master контейнере:
+incus exec salt-master -- salt-key -a <container-name>
 ```
 
 ### Изменение адреса Master

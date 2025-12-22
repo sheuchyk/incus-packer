@@ -73,7 +73,7 @@ build {
   }
 
   provisioner "file" {
-    source      = "../salt/minion"
+    source      = "../salt/minion.build"
     destination = "/etc/salt/minion"
   }
 

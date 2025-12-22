@@ -1,4 +1,4 @@
-.PHONY: init validate build-ubuntu build-ubuntu-salt build-ubuntu-salt-master build-debian build-debian-salt-master build-alpine build-all clean help
+.PHONY: init validate build-ubuntu build-ubuntu-salt build-ubuntu-salt-master build-debian build-debian-salt build-debian-salt-master build-alpine build-all clean help
 
 PACKER := packer
 TEMPLATES_DIR := templates
@@ -14,6 +14,7 @@ help:
 	@echo "  make build-ubuntu-salt - Build Ubuntu image with Salt provisioner"
 	@echo "  make build-ubuntu-salt-master - Build Ubuntu image with Salt Master installed"
 	@echo "  make build-debian   - Build Debian image"
+	@echo "  make build-debian-salt - Build Debian image with Salt provisioner"
 	@echo "  make build-debian-salt-master - Build Debian image with Salt Master installed"
 	@echo "  make build-alpine   - Build Alpine image"
 	@echo "  make build-all      - Build all images"
@@ -31,6 +32,7 @@ validate:
 	cd $(TEMPLATES_DIR) && $(PACKER) validate ubuntu-salt.pkr.hcl
 	cd $(TEMPLATES_DIR) && $(PACKER) validate ubuntu-salt-master.pkr.hcl
 	cd $(TEMPLATES_DIR) && $(PACKER) validate debian.pkr.hcl
+	cd $(TEMPLATES_DIR) && $(PACKER) validate debian-salt.pkr.hcl
 	cd $(TEMPLATES_DIR) && $(PACKER) validate debian-salt-master.pkr.hcl
 	cd $(TEMPLATES_DIR) && $(PACKER) validate alpine.pkr.hcl
 
@@ -58,6 +60,12 @@ build-debian: init
 		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
 		debian.pkr.hcl
 
+build-debian-salt: init
+	cd $(TEMPLATES_DIR) && $(PACKER) build \
+		$(if $(VM),-var 'virtual_machine=true',) \
+		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
+		debian-salt.pkr.hcl
+
 build-debian-salt-master: init
 	cd $(TEMPLATES_DIR) && $(PACKER) build \
 		$(if $(VM),-var 'virtual_machine=true',) \
@@ -70,7 +78,7 @@ build-alpine: init
 		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
 		alpine.pkr.hcl
 
-build-all: build-ubuntu build-ubuntu-salt build-ubuntu-salt-master build-debian build-debian-salt-master build-alpine
+build-all: build-ubuntu build-ubuntu-salt build-ubuntu-salt-master build-debian build-debian-salt build-debian-salt-master build-alpine
 
 clean:
 	@echo "Cleaning up..."

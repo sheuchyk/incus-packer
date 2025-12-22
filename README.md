@@ -13,6 +13,7 @@
 ```
 sudo apt update
 sudo apt install -y git build-essential
+sudo apt install bash-completion
 ```
 
 ## Установка и настройка packer
@@ -232,11 +233,13 @@ make build-debian-salt-master
 ```
 
 Скрипт:
+
 1. Создаёт контейнер из образа
 2. Копирует `minion.production` в `/etc/salt/minion`
 3. Запускает `salt-minion` сервис
 
 После запуска примите ключ на master:
+
 ```bash
 salt-key -a <container-name>
 ```
@@ -244,6 +247,7 @@ salt-key -a <container-name>
 ### Изменение адреса Master
 
 Отредактируйте `salt/minion.production`:
+
 ```yaml
 master: <новый-ip-или-hostname>
 ```

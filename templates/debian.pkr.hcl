@@ -34,6 +34,18 @@ variable "profile" {
   description = "Incus profile to use"
 }
 
+variable "static_ip" {
+  type        = string
+  default     = "10.0.0.11/24"
+  description = "Static IP address with CIDR notation"
+}
+
+variable "gateway" {
+  type        = string
+  default     = "172.16.0.2"
+  description = "Default gateway"
+}
+
 source "incus" "debian" {
   image           = var.source_image
   output_image    = var.image_name
@@ -51,6 +63,14 @@ build {
 
   provisioner "shell" {
     inline = [
+      "ip addr add ${var.static_ip} dev eth0",
+      "ip link set eth0 up",
+      "ip route add default via ${var.gateway}"
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
       "export DEBIAN_FRONTEND=noninteractive",
       "apt-get update",
       "apt-get upgrade -y",
@@ -63,6 +83,13 @@ build {
   provisioner "shell" {
     scripts = [
       "../scripts/common.sh"
+    ]
+  }
+
+  provisioner "shell" {
+    inline = [
+      "ip route del default via ${var.gateway} || true",
+      "ip addr flush dev eth0"
     ]
   }
 }

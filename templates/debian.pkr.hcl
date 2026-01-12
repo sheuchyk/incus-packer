@@ -65,7 +65,7 @@ build {
     inline = [
       "ip addr add ${var.static_ip} dev eth0",
       "ip link set eth0 up",
-      "ip route add default via ${var.gateway} dev eth0",
+      "ip route add default via ${var.gateway}",
       "cp /etc/resolv.conf /etc/resolv.conf.bak || true",
       "echo 'nameserver 172.16.0.241' > /etc/resolv.conf",
       "echo 'nameserver 172.16.0.242' >> /etc/resolv.conf"

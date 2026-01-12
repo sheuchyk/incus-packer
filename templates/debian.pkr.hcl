@@ -36,7 +36,7 @@ variable "profile" {
 
 variable "static_ip" {
   type        = string
-  default     = "10.0.0.11/24"
+  default     = "172.16.0.33/16"
   description = "Static IP address with CIDR notation"
 }
 
@@ -65,7 +65,10 @@ build {
     inline = [
       "ip addr add ${var.static_ip} dev eth0",
       "ip link set eth0 up",
-      "ip route add default via ${var.gateway}"
+      "ip route add default via ${var.gateway} dev eth0",
+      "cp /etc/resolv.conf /etc/resolv.conf.bak || true",
+      "echo 'nameserver 172.16.0.241' > /etc/resolv.conf",
+      "echo 'nameserver 172.16.0.242' >> /etc/resolv.conf"
     ]
   }
 
@@ -89,7 +92,8 @@ build {
   provisioner "shell" {
     inline = [
       "ip route del default via ${var.gateway} || true",
-      "ip addr flush dev eth0"
+      "ip addr flush dev eth0",
+      "mv /etc/resolv.conf.bak /etc/resolv.conf || rm -f /etc/resolv.conf"
     ]
   }
 }

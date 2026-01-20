@@ -25,8 +25,8 @@ STATIC_IP=""
 GATEWAY=""
 NETMASK="24"
 DNS_SERVERS="8.8.8.8,8.8.4.4"
-NETWORK="incusbr0"
-PROFILE=""
+NETWORK="br0"
+PROFILE="default"
 
 while [[ $# -gt 0 ]]; do
     case $1 in

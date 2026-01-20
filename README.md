@@ -273,6 +273,8 @@ make launch NAME=web1 IP=10.0.0.100 GATEWAY=10.0.0.1
 # С дополнительными параметрами
 make launch NAME=db1 IMAGE=debian-salt IP=10.0.0.50 GATEWAY=10.0.0.1 NETMASK=24 DNS=8.8.8.8
 
+make launch NAME=salt-master IMAGE=debian-salt-master IP=172.16.0.4 GATEWAY=172.16.0.2 NETMASK=24 DNS=172.16.0.241,172.16.0.242
+
 # Напрямую через скрипт
 ./scripts/launch-static-ip.sh mycontainer -a 10.0.0.100 -g 10.0.0.1
 ```

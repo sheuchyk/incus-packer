@@ -76,7 +76,8 @@ incus admin init
 │   ├── ubuntu-salt.pkr.hcl  # Ubuntu образ с Salt provisioner
 │   ├── ubuntu-salt-master.pkr.hcl  # Ubuntu образ с Salt Master
 │   ├── debian.pkr.hcl       # Debian образ
-│   └── alpine.pkr.hcl       # Alpine образ
+│   ├── debian-salt.pkr.hcl  # Debian образ с Salt provisioner
+│   └── debian-salt-master.pkr.hcl  # Debian образ с Salt Master
 ├── salt/                    # Salt конфигурация
 │   ├── master               # Конфиг Salt Master
 │   ├── minion.build         # Конфиг для masterless сборки
@@ -113,9 +114,6 @@ make build-ubuntu
 
 # Сборка Debian образа
 make build-debian
-
-# Сборка Alpine образа
-make build-alpine
 
 # Сборка Ubuntu с Salt provisioner
 make build-ubuntu-salt
@@ -155,9 +153,9 @@ packer build -var 'image_name=my-ubuntu' -var 'virtual_machine=true' ubuntu.pkr.
 
 | Переменная          | Описание             | По умолчанию                                                      |
 | ------------------- | -------------------- | ----------------------------------------------------------------- |
-| `image_name`        | Имя выходного образа | `ubuntu-custom` / `debian-custom` / `alpine-custom`               |
-| `image_description` | Описание образа      | `Custom <distro> image built with Packer`                         |
-| `source_image`      | Исходный образ       | `images:ubuntu/24.04` / `images:debian/12` / `images:alpine/3.20` |
+| `image_name`        | Имя выходного образа | `ubuntu-custom` / `debian-custom`               |
+| `image_description` | Описание образа      | `Custom <distro> image built with Packer`       |
+| `source_image`      | Исходный образ       | `images:ubuntu/24.04` / `images:debian/12`      |
 | `install_packages`  | Пакеты для установки | `["curl", "wget", "vim"]`                                         |
 | `virtual_machine`   | Сборка как VM        | `false`                                                           |
 | `profile`           | Профиль Incus        | `default`                                                         |
@@ -264,6 +262,90 @@ salt-key -a <container-name>
 incus exec salt-master -- salt-key -a <container-name>
 ```
 
+### Запуск контейнера со статическим IP
+
+Для запуска контейнера с настройкой статического IP:
+
+```bash
+# Через Makefile
+make launch NAME=web1 IP=10.0.0.100 GATEWAY=10.0.0.1
+
+# С дополнительными параметрами
+make launch NAME=db1 IMAGE=debian-salt IP=10.0.0.50 GATEWAY=10.0.0.1 NETMASK=24 DNS=8.8.8.8
+
+# Напрямую через скрипт
+./scripts/launch-static-ip.sh mycontainer -a 10.0.0.100 -g 10.0.0.1
+```
+
+Параметры:
+
+| Параметр  | Описание              | По умолчанию       |
+|-----------|-----------------------|--------------------|
+| `NAME`    | Имя контейнера        | (обязательно)      |
+| `IMAGE`   | Имя образа            | `ubuntu-salt`      |
+| `IP`      | Статический IP адрес  | -                  |
+| `GATEWAY` | Адрес шлюза           | -                  |
+| `NETMASK` | Маска сети            | `24`               |
+| `DNS`     | DNS серверы           | `8.8.8.8,8.8.4.4`  |
+| `PROFILE` | Incus профиль         | -                  |
+
+### Оркестрация контейнеров через Salt
+
+Salt states для управления Incus контейнерами находятся в `salt/states/incus/`.
+
+#### Определение контейнеров
+
+Отредактируйте `salt/pillar/incus.sls`:
+
+```yaml
+incus:
+  containers:
+    web1:
+      image: ubuntu-salt
+      profiles:
+        - default
+      network:
+        static_ip: 10.0.0.10
+        gateway: 10.0.0.1
+        netmask: 24
+        dns: "8.8.8.8, 8.8.4.4"
+      salt_minion: true
+      config:
+        limits.cpu: "2"
+        limits.memory: 2GB
+```
+
+#### Управление контейнерами
+
+```bash
+# Создать/обновить все контейнеры
+salt 'salt-master' state.apply incus
+
+# Остановить все контейнеры
+salt 'salt-master' state.apply incus.stop
+
+# Запустить все контейнеры
+salt 'salt-master' state.apply incus.start
+
+# Удалить все контейнеры
+salt 'salt-master' state.apply incus.destroy
+```
+
+#### Опции контейнеров
+
+| Опция               | Описание                      | По умолчанию        |
+|---------------------|-------------------------------|---------------------|
+| `image`             | Имя образа Incus              | `ubuntu-salt`       |
+| `profiles`          | Список профилей Incus         | `['default']`       |
+| `running`           | Запустить после создания      | `true`              |
+| `salt_minion`       | Включить и запустить minion   | `true`              |
+| `network.static_ip` | Статический IP адрес          | -                   |
+| `network.gateway`   | Адрес шлюза                   | -                   |
+| `network.netmask`   | Маска сети                    | `24`                |
+| `network.dns`       | DNS серверы                   | `8.8.8.8, 8.8.4.4`  |
+| `config`            | Опции конфигурации Incus      | -                   |
+| `devices`           | Конфигурация устройств        | -                   |
+
 ### Изменение адреса Master
 
 Отредактируйте `salt/minion.production`:
@@ -302,7 +384,6 @@ incus image list images:
 - `images:ubuntu/22.04` - Ubuntu 22.04 LTS
 - `images:debian/12` - Debian 12 (Bookworm)
 - `images:debian/11` - Debian 11 (Bullseye)
-- `images:alpine/3.20` - Alpine 3.20
 - `images:centos/9-Stream` - CentOS Stream 9
 - `images:rockylinux/9` - Rocky Linux 9
 

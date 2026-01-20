@@ -1,4 +1,4 @@
-.PHONY: init validate build-ubuntu build-ubuntu-salt build-ubuntu-salt-master build-debian build-debian-salt build-debian-salt-master build-alpine build-all clean help
+.PHONY: init validate build-ubuntu build-ubuntu-salt build-ubuntu-salt-master build-debian build-debian-salt build-debian-salt-master build-all clean help launch
 
 PACKER := packer
 TEMPLATES_DIR := templates
@@ -16,13 +16,23 @@ help:
 	@echo "  make build-debian   - Build Debian image"
 	@echo "  make build-debian-salt - Build Debian image with Salt provisioner"
 	@echo "  make build-debian-salt-master - Build Debian image with Salt Master installed"
-	@echo "  make build-alpine   - Build Alpine image"
 	@echo "  make build-all      - Build all images"
 	@echo "  make clean          - Remove build artifacts"
+	@echo "  make launch         - Launch container with static IP"
 	@echo ""
 	@echo "Options:"
 	@echo "  VM=true             - Build as virtual machine (e.g., make build-ubuntu VM=true)"
 	@echo "  PROFILE=myprofile   - Use specific Incus profile"
+	@echo ""
+	@echo "Launch options (for make launch):"
+	@echo "  NAME=mycontainer    - Container name (required)"
+	@echo "  IMAGE=ubuntu-salt   - Image to use"
+	@echo "  IP=10.0.0.100       - Static IP address"
+	@echo "  GATEWAY=10.0.0.1    - Gateway address"
+	@echo "  NETMASK=24          - Network mask"
+	@echo "  DNS=8.8.8.8         - DNS servers"
+	@echo ""
+	@echo "Example: make launch NAME=web1 IP=10.0.0.100 GATEWAY=10.0.0.1"
 
 init:
 	$(PACKER) init .
@@ -34,7 +44,6 @@ validate:
 	cd $(TEMPLATES_DIR) && $(PACKER) validate debian.pkr.hcl
 	cd $(TEMPLATES_DIR) && $(PACKER) validate debian-salt.pkr.hcl
 	cd $(TEMPLATES_DIR) && $(PACKER) validate debian-salt-master.pkr.hcl
-	cd $(TEMPLATES_DIR) && $(PACKER) validate alpine.pkr.hcl
 
 build-ubuntu: init
 	cd $(TEMPLATES_DIR) && $(PACKER) build \
@@ -72,15 +81,21 @@ build-debian-salt-master: init
 		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
 		debian-salt-master.pkr.hcl
 
-build-alpine: init
-	cd $(TEMPLATES_DIR) && $(PACKER) build \
-		$(if $(VM),-var 'virtual_machine=true',) \
-		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
-		alpine.pkr.hcl
-
-build-all: build-ubuntu build-ubuntu-salt build-ubuntu-salt-master build-debian build-debian-salt build-debian-salt-master build-alpine
+build-all: build-ubuntu build-ubuntu-salt build-ubuntu-salt-master build-debian build-debian-salt build-debian-salt-master
 
 clean:
 	@echo "Cleaning up..."
 	rm -rf packer_cache
 	@echo "Note: To remove built images, use 'incus image delete <image-name>'"
+
+launch:
+ifndef NAME
+	$(error NAME is required. Usage: make launch NAME=mycontainer IP=10.0.0.100 GATEWAY=10.0.0.1)
+endif
+	./scripts/launch-static-ip.sh $(NAME) \
+		$(if $(IMAGE),-i $(IMAGE),) \
+		$(if $(IP),-a $(IP),) \
+		$(if $(GATEWAY),-g $(GATEWAY),) \
+		$(if $(NETMASK),-n $(NETMASK),) \
+		$(if $(DNS),-d $(DNS),) \
+		$(if $(PROFILE),-p $(PROFILE),)

@@ -23,16 +23,16 @@ variable "virtual_machine" {
 }
 
 variable "profile" {
-  type        = list(string)
-  default     = ["default"]
-  description = "Incus profiles to use"
+  type        = string
+  default     = "default"
+  description = "Incus profile to use"
 }
 
 source "incus" "ubuntu" {
   image           = var.source_image
   output_image    = var.image_name
   container_name  = "packer-ubuntu-salt-master-build"
-  profiles        = var.profile
+  profile         = var.profile
   virtual_machine = var.virtual_machine
 
   publish_properties = {

@@ -12,7 +12,7 @@
 
 ```
 sudo apt update
-sudo apt install -y git build-essential
+sudo apt install -y git build-essential vim
 sudo apt install bash-completion
 ```
 

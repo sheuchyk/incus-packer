@@ -48,37 +48,37 @@ validate:
 build-ubuntu: init
 	cd $(TEMPLATES_DIR) && $(PACKER) build \
 		$(if $(VM),-var 'virtual_machine=true',) \
-		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
+		$(if $(PROFILE),-var 'profile=["$(PROFILE)"]',) \
 		ubuntu.pkr.hcl
 
 build-ubuntu-salt: init
 	cd $(TEMPLATES_DIR) && $(PACKER) build \
 		$(if $(VM),-var 'virtual_machine=true',) \
-		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
+		$(if $(PROFILE),-var 'profile=["$(PROFILE)"]',) \
 		ubuntu-salt.pkr.hcl
 
 build-ubuntu-salt-master: init
 	cd $(TEMPLATES_DIR) && $(PACKER) build \
 		$(if $(VM),-var 'virtual_machine=true',) \
-		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
+		$(if $(PROFILE),-var 'profile=["$(PROFILE)"]',) \
 		ubuntu-salt-master.pkr.hcl
 
 build-debian: init
 	cd $(TEMPLATES_DIR) && $(PACKER) build \
 		$(if $(VM),-var 'virtual_machine=true',) \
-		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
+		$(if $(PROFILE),-var 'profile=["$(PROFILE)"]',) \
 		debian.pkr.hcl
 
 build-debian-salt: init
 	cd $(TEMPLATES_DIR) && $(PACKER) build \
 		$(if $(VM),-var 'virtual_machine=true',) \
-		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
+		$(if $(PROFILE),-var 'profile=["$(PROFILE)"]',) \
 		debian-salt.pkr.hcl
 
 build-debian-salt-master: init
 	cd $(TEMPLATES_DIR) && $(PACKER) build \
 		$(if $(VM),-var 'virtual_machine=true',) \
-		$(if $(PROFILE),-var 'profile=$(PROFILE)',) \
+		$(if $(PROFILE),-var 'profile=["$(PROFILE)"]',) \
 		debian-salt-master.pkr.hcl
 
 build-all: build-ubuntu build-ubuntu-salt build-ubuntu-salt-master build-debian build-debian-salt build-debian-salt-master

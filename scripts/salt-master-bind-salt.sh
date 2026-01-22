@@ -14,6 +14,11 @@ echo "Setting up bind mounts for Salt states and pillar..."
 incus config device add "$CONTAINER_NAME" salt-states disk source="${SCRIPT_DIR}/../salt/states" path=/srv/salt/states
 incus config device add "$CONTAINER_NAME" salt-pillar disk source="${SCRIPT_DIR}/../salt/pillar" path=/srv/salt/pillar
 
+echo "Mounting Incus socket for container management..."
+incus config device add "$CONTAINER_NAME" incus-socket unix-char source=/var/lib/incus/unix.socket path=/var/lib/incus/unix.socket
+incus exec "$CONTAINER_NAME" -- ln -sf /var/lib/incus/unix.socket /var/lib/lxd/unix.socket
+
+
 echo "Enabling and starting salt-master..."
 incus exec "$CONTAINER_NAME" -- systemctl enable salt-master
 incus exec "$CONTAINER_NAME" -- systemctl restart salt-master

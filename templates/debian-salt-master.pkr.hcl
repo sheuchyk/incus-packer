@@ -85,7 +85,7 @@ build {
       "curl -fsSL https://packages.broadcom.com/artifactory/api/security/keypair/SaltProjectKey/public | gpg --dearmor -o /etc/apt/keyrings/salt-archive-keyring.gpg",
       "echo 'deb [signed-by=/etc/apt/keyrings/salt-archive-keyring.gpg] https://packages.broadcom.com/artifactory/saltproject-deb stable main' > /etc/apt/sources.list.d/salt.list",
       "apt-get update",
-      "apt-get install -y salt-master salt-minion"
+      "apt-get install -y salt-master salt-minion python3-pylxd"
     ]
   }
 

@@ -8,5 +8,3 @@ packages:
     - nano
     - htop
     - git
-    - netplan.io
-    - systemd-resolved

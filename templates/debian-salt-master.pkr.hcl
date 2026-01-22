@@ -66,6 +66,15 @@ build {
     ]
   }
 
+  # # Install Netplan
+  # provisioner "shell" {
+  #   inline = [
+  #     "export DEBIAN_FRONTEND=noninteractive",
+  #     "apt-get update",
+  #     "apt-get install -y netplan.io systemd-resolved",
+  #   ]
+  # }
+
   # Install Salt Master from official repository
   provisioner "shell" {
     inline = [
@@ -108,6 +117,24 @@ build {
   provisioner "shell" {
     inline = [
       "systemctl enable salt-master"
+    ]
+  }
+
+  # Copy Salt configuration
+  provisioner "file" {
+    source      = "../salt/"
+    destination = "/srv/salt/"
+  }
+
+  provisioner "file" {
+    source      = "../salt/minion.build"
+    destination = "/etc/salt/minion"
+  }
+
+  # Run Salt in masterless mode
+  provisioner "shell" {
+    inline = [
+      "salt-call --local state.apply"
     ]
   }
 

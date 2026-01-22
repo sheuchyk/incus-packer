@@ -2,7 +2,7 @@ packer {
   required_plugins {
     incus = {
       source  = "github.com/bketelsen/incus"
-      version = "= 1.0.5"
+      version = ">= 1.2.0"
     }
   }
 }

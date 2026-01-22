@@ -3,16 +3,16 @@
 
 incus:
   containers:
-    # Example web server
-    web1:
-      image: ubuntu-salt
+    # salt-master server
+    salt-master:
+      image: debian-salt-master
       profiles:
         - default
       network:
-        static_ip: 10.0.0.10
-        gateway: 10.0.0.1
+        static_ip: 172.16.0.4
+        gateway: 172.16.0.2
         netmask: 24
-        dns: "8.8.8.8, 8.8.4.4"
+        dns: "172.16.0.241, 172.16.0.242"
       salt_minion: true
       config:
         limits.cpu: "2"
@@ -24,9 +24,10 @@ incus:
       profiles:
         - default
       network:
-        static_ip: 10.0.0.20
-        gateway: 10.0.0.1
+        static_ip: 172.16.0.5
+        gateway: 172.16.0.2
         netmask: 24
+        dns: "172.16.0.241, 172.16.0.242"
       salt_minion: true
       config:
         limits.cpu: "4"

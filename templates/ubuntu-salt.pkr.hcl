@@ -23,9 +23,9 @@ variable "virtual_machine" {
 }
 
 variable "profile" {
-  type        = string
-  default     = "default"
-  description = "Incus profile to use"
+  type        = list(string)
+  default     = ["default"]
+  description = "Incus profiles to use"
 }
 
 variable "static_ip" {

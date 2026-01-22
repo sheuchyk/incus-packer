@@ -132,7 +132,7 @@ EOF"
     fi
 
     echo "Setting Incus network device to use static IP..."
-    incus config device override "$CONTAINER_NAME" eth0 ipv4.address="$STATIC_IP"
+    # incus config device override "$CONTAINER_NAME" eth0 ipv4.address="$STATIC_IP"
 
     echo "Static IP configured successfully."
 fi

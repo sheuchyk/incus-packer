@@ -51,7 +51,7 @@
         incus exec {{ name }} -- chmod 600 /etc/netplan/50-static.yaml
         incus exec {{ name }} -- rm -f /etc/netplan/10-incus.yaml 2>/dev/null || true
         incus exec {{ name }} -- netplan apply
-        incus config device override {{ name }} eth0 ipv4.address="{{ config.network.static_ip }}"
+        # incus config device override {{ name }} eth0 ipv4.address="{{ config.network.static_ip }}"
         rm /tmp/{{ name }}_netplan.yaml
     - require:
       - lxd_container: {{ name }}_container

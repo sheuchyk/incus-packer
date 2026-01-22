@@ -76,6 +76,7 @@ incus:
 ```bash
 # Create/update all containers
 salt 'salt-master' state.apply incus
+salt 's-0-2' state.apply incus
 
 # Stop all containers
 salt 'salt-master' state.apply incus.stop

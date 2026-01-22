@@ -1,0 +1,28 @@
+#!/bin/bash
+set -e
+
+CONTAINER_NAME="${1:?Usage: $0 <container-name> [image-name]}"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+MASTER_CONFIG="${SCRIPT_DIR}/../salt/master"
+
+if [[ ! -f "$MASTER_CONFIG" ]]; then
+    echo "Error: master config not found at $MASTER_CONFIG"
+    exit 1
+fi
+
+echo "Setting up bind mounts for Salt states and pillar..."
+incus config device add "$CONTAINER_NAME" salt-states disk source="${SCRIPT_DIR}/../salt/states" path=/srv/salt/states
+incus config device add "$CONTAINER_NAME" salt-pillar disk source="${SCRIPT_DIR}/../salt/pillar" path=/srv/salt/pillar
+
+echo "Enabling and starting salt-master..."
+incus exec "$CONTAINER_NAME" -- systemctl enable salt-master
+incus exec "$CONTAINER_NAME" -- systemctl restart salt-master
+
+CONTAINER_IP=$(incus list "$CONTAINER_NAME" -f csv -c 4 | cut -d' ' -f1)
+
+echo ""
+echo "Done. Salt Master '$CONTAINER_NAME' is running."
+echo "Master IP: $CONTAINER_IP"
+echo ""
+echo "To accept minion keys: incus exec $CONTAINER_NAME -- salt-key -L"
+echo "To accept all keys:    incus exec $CONTAINER_NAME -- salt-key -A"
